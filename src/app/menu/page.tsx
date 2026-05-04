@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import {
   damasMenu,
   boulevardMenu,
@@ -73,40 +73,56 @@ function MenuContent() {
   const badgeClass = isDamas ? "badge-signature-damas" : "badge-signature";
   const borderColor = isDamas ? "border-gray-100" : "border-blvd-gold/15";
   const footerBg = isDamas ? "bg-white/90" : "bg-blvd-cream/90";
+  const navbarBg = isDamas ? "bg-white" : "bg-blvd-navy";
+  const navbarBorder = isDamas ? "border-gray-100" : "border-blvd-navy-light";
+  const backBtnColor = isDamas ? "text-gray-500 hover:text-gray-800" : "text-white/70 hover:text-white";
 
   return (
     <main
       className={`flex flex-col min-h-dvh ${bgClass} transition-colors duration-500`}
     >
-      {/* ─── Top Bar ─── */}
+      {/* ─── Branded Navbar ─── */}
       <header
-        className={`sticky top-0 z-50 glass-overlay ${footerBg} border-b ${borderColor} transition-colors duration-500`}
+        className={`sticky top-0 z-50 ${navbarBg} border-b ${navbarBorder} shadow-sm transition-colors duration-500`}
       >
-        <div className="max-w-2xl mx-auto px-4 pt-4 pb-3">
-          {/* Back + Brand Toggle Row */}
-          <div className="flex items-center justify-between mb-3">
+        {/* Top row: Back / Logo / Toggle */}
+        <div className="max-w-2xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            {/* Back button */}
             <Link
               href="/"
               id="menu-back"
-              className={`flex items-center gap-1.5 text-sm ${mutedColor} hover:${headerColor} transition-colors`}
+              className={`flex items-center gap-1 text-sm ${backBtnColor} transition-colors`}
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ChevronLeft className="w-5 h-5" />
               <span className="font-medium">Retour</span>
             </Link>
+
+            {/* Center logo */}
+            <div className="absolute left-1/2 -translate-x-1/2">
+              <Image
+                src={isDamas ? "/logos/damas.svg" : "/logos/boulevard.svg"}
+                alt={isDamas ? "Damas Logo" : "Le Boulevard Logo"}
+                width={120}
+                height={60}
+                className="h-10 w-auto object-contain transition-all duration-500"
+                priority
+              />
+            </div>
 
             {/* Brand Toggle */}
             <div
               className={`flex rounded-full p-0.5 ${
-                isDamas ? "bg-gray-100" : "bg-blvd-cream-dark"
+                isDamas ? "bg-gray-100" : "bg-white/10"
               } transition-colors duration-500`}
             >
               <button
                 id="toggle-damas"
                 onClick={() => setBrand("damas")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
                   isDamas
                     ? "bg-damas-orange text-white shadow-sm"
-                    : "text-gray-500 hover:text-gray-700"
+                    : "text-white/60 hover:text-white"
                 }`}
               >
                 Damas
@@ -114,9 +130,9 @@ function MenuContent() {
               <button
                 id="toggle-boulevard"
                 onClick={() => setBrand("boulevard")}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
+                className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
                   !isDamas
-                    ? "bg-blvd-navy text-white shadow-sm"
+                    ? "bg-blvd-gold text-white shadow-sm"
                     : "text-gray-500 hover:text-gray-700"
                 }`}
               >
@@ -124,11 +140,15 @@ function MenuContent() {
               </button>
             </div>
           </div>
+        </div>
 
-          {/* Category Scroll */}
+        {/* Category Scroll — separate row */}
+        <div className={`border-t ${
+          isDamas ? "border-gray-50 bg-white" : "border-blvd-navy-light bg-blvd-navy"
+        } transition-colors duration-500`}>
           <div
             ref={categoryScrollRef}
-            className="flex gap-2 overflow-x-auto category-scroll pb-1"
+            className="max-w-2xl mx-auto px-4 py-2 flex gap-2 overflow-x-auto category-scroll"
           >
             {menu.map((cat) => (
               <button
@@ -148,19 +168,14 @@ function MenuContent() {
 
       {/* ─── Menu Content ─── */}
       <div className="flex-1 max-w-2xl mx-auto w-full px-4 pt-6 pb-28">
-        {/* Brand Title */}
+        {/* Brand subtitle + accent divider */}
         <div className="mb-8 animate-fade-in">
-          <h1
-            className={`font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold ${headerColor} transition-colors duration-500`}
-          >
-            {isDamas ? "Damas VDN" : "Le Boulevard"}
-          </h1>
           <p
-            className={`mt-1 text-sm ${mutedColor} font-[family-name:var(--font-montserrat)] transition-colors duration-500`}
+            className={`text-sm font-medium tracking-wide uppercase ${mutedColor} font-[family-name:var(--font-montserrat)] transition-colors duration-500`}
           >
             {isDamas
               ? "Boulangerie & Fast Casual"
-              : "Salon de Thé & Brunch — by Damas"}
+              : "Salon de Thé & Brunch"}
           </p>
           <div className={`mt-3 w-16 h-0.5 ${accentBg} rounded-full`} />
         </div>

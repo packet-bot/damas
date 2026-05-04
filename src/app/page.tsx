@@ -39,18 +39,23 @@ export default function HomePage() {
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
           />
-          {/* Orange gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-damas-orange/90 via-damas-orange/40 to-transparent transition-opacity duration-500 group-hover:from-damas-orange/95" />
+          {/* Protective dark-to-orange gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/40 to-black/20 transition-opacity duration-500 group-hover:from-black/80" />
 
-          {/* Card content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-end p-8 text-white">
-            <span className="text-xs font-semibold tracking-[0.2em] uppercase opacity-80 mb-2 font-[family-name:var(--font-montserrat)]">
+          {/* Card content — logo centered */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-white">
+            <Image
+              src="/logos/damas.svg"
+              alt="Damas Logo"
+              width={192}
+              height={96}
+              className="w-48 h-auto object-contain mb-4 drop-shadow-lg"
+              priority
+            />
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase opacity-90 font-[family-name:var(--font-montserrat)]">
               Boulangerie &amp; Fast Casual
             </span>
-            <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold mb-3">
-              Damas VDN
-            </h2>
-            <div className="flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+            <div className="mt-4 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
               <span>Découvrir le menu</span>
               <svg
                 className="w-4 h-4 transition-transform group-hover:translate-x-1"
@@ -83,21 +88,23 @@ export default function HomePage() {
             priority
             sizes="(max-width: 768px) 100vw, 50vw"
           />
-          {/* Navy gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-blvd-navy/90 via-blvd-navy/40 to-transparent transition-opacity duration-500 group-hover:from-blvd-navy/95" />
+          {/* Protective dark-to-navy gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/50 to-black/25 transition-opacity duration-500 group-hover:from-black/80" />
 
-          {/* Card content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-end p-8 text-white">
-            <span className="text-xs font-semibold tracking-[0.2em] uppercase opacity-80 mb-2 font-[family-name:var(--font-montserrat)]">
+          {/* Card content — logo centered */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-white">
+            <Image
+              src="/logos/boulevard.svg"
+              alt="Le Boulevard by Damas Logo"
+              width={192}
+              height={96}
+              className="w-48 h-auto object-contain mb-4 drop-shadow-lg"
+              priority
+            />
+            <span className="text-xs font-semibold tracking-[0.2em] uppercase opacity-90 font-[family-name:var(--font-montserrat)]">
               Salon de Thé &amp; Brunch
             </span>
-            <h2 className="font-[family-name:var(--font-playfair)] text-3xl sm:text-4xl font-bold mb-3">
-              Le Boulevard
-            </h2>
-            <span className="text-xs tracking-wide opacity-60 mb-3 font-[family-name:var(--font-montserrat)]">
-              by Damas
-            </span>
-            <div className="flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+            <div className="mt-4 flex items-center gap-2 text-sm font-medium opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
               <span>Découvrir le menu</span>
               <svg
                 className="w-4 h-4 transition-transform group-hover:translate-x-1"
