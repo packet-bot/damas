@@ -27,6 +27,7 @@ function MenuContent() {
   const [brand, setBrand] = useState<Brand>(initialBrand);
   const [activeCategory, setActiveCategory] = useState<string>("");
   const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const isDamas = brand === "damas";
   const menu: MenuCategory[] = isDamas ? damasMenu : boulevardMenu;
@@ -52,7 +53,11 @@ function MenuContent() {
 
   const scrollToCategory = (catId: string) => {
     setActiveCategory(catId);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const el = categoryRefs.current[catId];
+    if (el) {
+      const top = el.getBoundingClientRect().top + window.scrollY - 148;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
   };
 
   /* Theme tokens */
@@ -138,7 +143,7 @@ function MenuContent() {
 
               <div className={`flex rounded-full p-0.5 ${isDamas ? "bg-gray-100" : "bg-white/10"} transition-colors duration-500`}>
                 <button
-                  onClick={() => { setBrand("damas"); setActiveCategory(damasMenu[0].id); }}
+                  onClick={() => setBrand("damas")}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
                     isDamas ? "bg-damas-orange text-white shadow-sm" : "text-white/60 hover:text-white"
                   }`}
@@ -146,7 +151,7 @@ function MenuContent() {
                   Damas
                 </button>
                 <button
-                  onClick={() => { setBrand("boulevard"); setActiveCategory(boulevardMenu[0].id); }}
+                  onClick={() => setBrand("boulevard")}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
                     !isDamas ? "bg-blvd-gold text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
                   }`}
@@ -157,78 +162,77 @@ function MenuContent() {
             </div>
           </div>
 
-          {/* Category nav — text-based with right-fade scroll hint */}
+          {/* Category nav — text-based */}
           <div className={`border-t ${catBg} transition-all duration-500`}>
-            <div className="relative max-w-2xl mx-auto">
-              <div
-                ref={categoryScrollRef}
-                className="flex gap-0 overflow-x-auto overflow-y-hidden scroll-smooth touch-pan-x category-scroll px-4"
-              >
-                {menu.map((cat) => (
-                  <button
-                    key={cat.id}
-                    data-cat={cat.id}
-                    onClick={() => scrollToCategory(cat.id)}
-                    className={`shrink-0 px-4 py-3 text-[0.65rem] font-semibold uppercase tracking-widest transition-all duration-300 border-b-2 whitespace-nowrap ${
-                      activeCategory === cat.id ? catActive : catInactive
-                    }`}
-                  >
-                    {cat.name}
-                  </button>
-                ))}
-              </div>
-              {/* Right-edge fade — signals more tabs on scroll */}
-              <div className={`absolute right-0 top-0 bottom-0 w-10 pointer-events-none ${
-                isDamas
-                  ? "bg-gradient-to-l from-white/90 to-transparent"
-                  : "bg-gradient-to-l from-blvd-navy/95 to-transparent"
-              }`} aria-hidden />
+            <div
+              ref={categoryScrollRef}
+              className="max-w-2xl mx-auto px-4 flex gap-6 overflow-x-auto category-scroll"
+            >
+              {menu.map((cat) => (
+                <button
+                  key={cat.id}
+                  data-cat={cat.id}
+                  onClick={() => scrollToCategory(cat.id)}
+                  className={`shrink-0 py-3 text-[0.65rem] font-semibold uppercase tracking-widest transition-all duration-300 border-b-2 whitespace-nowrap ${
+                    activeCategory === cat.id ? catActive : catInactive
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
             </div>
           </div>
         </header>
 
-        {/* ─── Menu content — filtered to active category ─── */}
-        <div key={`${brand}-${activeCategory}`} className="flex-1 max-w-2xl mx-auto w-full px-4 pt-6 pb-36">
-          {menu
-            .filter((cat) => cat.id === activeCategory)
-            .map((category) => (
-              <section
-                key={category.id}
-                className={`rounded-2xl overflow-hidden ${glassCard} animate-fade-in-up`}
-              >
-                {/* Category header */}
-                <div className="px-5 pt-5 pb-3">
-                  <h2 className={`font-[family-name:var(--font-playfair)] text-xl font-bold ${headerColor} transition-colors duration-500`}>
-                    {category.name}
-                  </h2>
-                  <div className={`mt-2 w-8 h-0.5 ${accentBg} rounded-full`} />
-                </div>
+        {/* ─── Menu content — key forces re-animation on brand switch ─── */}
+        <div key={brand} className="flex-1 max-w-2xl mx-auto w-full px-4 pt-6 pb-36">
+          <div className="mb-8 animate-fade-in">
+            <p className={`text-sm font-medium tracking-wide uppercase ${mutedColor} font-[family-name:var(--font-montserrat)] transition-colors duration-500`}>
+              {isDamas ? "Boulangerie & Fast Casual" : "Salon de Thé & Brunch"}
+            </p>
+            <div className={`mt-3 w-16 h-0.5 ${accentBg} rounded-full`} />
+          </div>
 
-                {/* Items */}
-                <div className="px-5 pb-2">
-                  {category.items.map((item, itemIdx) => (
-                    <div
-                      key={`${category.id}-${itemIdx}`}
-                      className="animate-fade-in-up"
-                      style={{ animationDelay: `${itemIdx * 45}ms` }}
-                    >
-                      <MenuItemRow
-                        item={item}
-                        accentColor={accentColor}
-                        headerColor={headerColor}
-                        mutedColor={mutedColor}
-                        badgeClass={badgeClass}
-                        borderColor={borderColor}
-                        leaderColor={leaderColor}
-                        currentDay={currentDay}
-                        dayBadgeActive={dayBadgeActive}
-                        dayBadgeMuted={dayBadgeMuted}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ))}
+          {menu.map((category, catIdx) => (
+            <section
+              key={category.id}
+              ref={(el) => { categoryRefs.current[category.id] = el; }}
+              className={`mb-6 rounded-2xl overflow-hidden ${glassCard} animate-fade-in-up`}
+              style={{ animationDelay: `${catIdx * 80}ms` }}
+            >
+              {/* Category header inside glass card */}
+              <div className="px-5 pt-5 pb-3">
+                <h2 className={`font-[family-name:var(--font-playfair)] text-xl font-bold ${headerColor} transition-colors duration-500`}>
+                  {category.name}
+                </h2>
+                <div className={`mt-2 w-8 h-0.5 ${accentBg} rounded-full`} />
+              </div>
+
+              {/* Items */}
+              <div className="px-5 pb-2">
+                {category.items.map((item, itemIdx) => (
+                  <div
+                    key={`${category.id}-${itemIdx}`}
+                    className="animate-fade-in-up"
+                    style={{ animationDelay: `${catIdx * 80 + itemIdx * 55}ms` }}
+                  >
+                    <MenuItemRow
+                      item={item}
+                      accentColor={accentColor}
+                      headerColor={headerColor}
+                      mutedColor={mutedColor}
+                      badgeClass={badgeClass}
+                      borderColor={borderColor}
+                      leaderColor={leaderColor}
+                      currentDay={currentDay}
+                      dayBadgeActive={dayBadgeActive}
+                      dayBadgeMuted={dayBadgeMuted}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
         </div>
 
         {/* ─── Sticky Footer — frosted glass + brand CTA ─── */}
