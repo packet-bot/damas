@@ -1,17 +1,14 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ChevronLeft } from "lucide-react";
 import { motion } from "framer-motion";
-import {
-  damasMenu,
-  boulevardMenu,
-  type MenuCategory,
-  type MenuItem,
-} from "@/data/menu-data";
+import { menuData, type BrandKey, type MenuItem } from "@/data/menu-data";
+
+const DAY_ORDER = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"] as const;
 
 const WA_ICON = (
   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
@@ -19,86 +16,100 @@ const WA_ICON = (
   </svg>
 );
 
-type Brand = "damas" | "boulevard";
+/* Group items by their badge, preserving Lundi → Dimanche order */
+function groupByDay(items: MenuItem[]): { day: string; items: MenuItem[] }[] {
+  const groups: Record<string, MenuItem[]> = {};
+  for (const item of items) {
+    if (!item.badge) continue;
+    if (!groups[item.badge]) groups[item.badge] = [];
+    groups[item.badge].push(item);
+  }
+  return DAY_ORDER.filter((d) => groups[d]).map((d) => ({ day: d, items: groups[d] }));
+}
+
+function hasBadges(items: MenuItem[]): boolean {
+  return items.some((i) => i.badge);
+}
 
 function MenuContent() {
   const searchParams = useSearchParams();
-  const initialBrand = (searchParams.get("brand") as Brand) || "damas";
-  const [brand, setBrand] = useState<Brand>(initialBrand);
-  const [activeCategory, setActiveCategory] = useState<string>("");
-  const categoryScrollRef = useRef<HTMLDivElement>(null);
-  const categoryRefs = useRef<Record<string, HTMLElement | null>>({});
+  const initialBrand = (searchParams.get("brand") as BrandKey) || "damas";
 
-  const isDamas = brand === "damas";
-  const menu: MenuCategory[] = isDamas ? damasMenu : boulevardMenu;
-
-  /* Current day — null on server, set client-side to avoid hydration mismatch */
+  const [brand, setBrand] = useState<BrandKey>(initialBrand);
+  const [activeCategory, setActiveCategory] = useState<string>(
+    menuData[initialBrand].categories[0].name
+  );
   const [currentDay, setCurrentDay] = useState<string | null>(null);
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+
+  /* Real day on client only — avoids SSR hydration mismatch */
   useEffect(() => {
-    const DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
-    setCurrentDay(DAYS[new Date().getDay()]);
+    const raw = new Date().toLocaleDateString("fr-FR", { weekday: "long" });
+    setCurrentDay(raw.charAt(0).toUpperCase() + raw.slice(1));
   }, []);
 
-  useEffect(() => {
-    if (menu.length > 0) setActiveCategory(menu[0].id);
-  }, [brand, menu]);
+  /* Brand toggle — synchronously reset activeCategory to prevent stale-ID crash */
+  const switchBrand = (next: BrandKey) => {
+    setBrand(next);
+    setActiveCategory(menuData[next].categories[0].name);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
+  /* Scroll active tab into view in the horizontal nav */
   useEffect(() => {
-    if (!activeCategory || !categoryScrollRef.current) return;
+    if (!categoryScrollRef.current) return;
     const btn = categoryScrollRef.current.querySelector(
       `[data-cat="${activeCategory}"]`
     ) as HTMLElement | null;
     if (btn) btn.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
   }, [activeCategory]);
 
-  const scrollToCategory = (catId: string) => {
-    setActiveCategory(catId);
-    const el = categoryRefs.current[catId];
-    if (el) {
-      const top = el.getBoundingClientRect().top + window.scrollY - 148;
-      window.scrollTo({ top, behavior: "smooth" });
-    }
-  };
+  const isDamas = brand === "damas";
 
-  /* Theme tokens */
-  const accentColor  = isDamas ? "text-damas-orange" : "text-blvd-gold";
-  const accentBg     = isDamas ? "bg-damas-orange"   : "bg-blvd-gold";
-  const headerColor  = isDamas ? "text-gray-900"     : "text-blvd-navy";
-  const mutedColor   = isDamas ? "text-gray-400"     : "text-blvd-navy/50";
-  const badgeClass   = isDamas ? "badge-signature-damas" : "badge-signature";
-  const borderColor  = isDamas ? "border-gray-100"   : "border-blvd-gold/15";
-  const leaderColor  = isDamas ? "border-gray-200"   : "border-blvd-navy/15";
-  const footerBg     = isDamas ? "bg-white/80"       : "bg-blvd-cream/80";
-  const navbarBg     = isDamas ? "bg-white/90 backdrop-blur-md" : "bg-blvd-navy/95 backdrop-blur-md";
-  const navbarBorder = isDamas ? "border-gray-100"   : "border-blvd-navy-light";
-  const backBtnColor = isDamas ? "text-gray-500 hover:text-gray-800" : "text-white/70 hover:text-white";
-  const catBg        = isDamas ? "border-gray-100 bg-white/80 backdrop-blur-sm" : "border-blvd-navy-light bg-blvd-navy/95 backdrop-blur-md";
-  const glassCard    = isDamas ? "bg-white/65 backdrop-blur-md ring-1 ring-white/50 shadow-sm" : "bg-blvd-cream/70 backdrop-blur-md ring-1 ring-blvd-cream-dark/40 shadow-sm";
+  /* ─── Theme tokens ─── */
+  const pageBg          = isDamas ? "bg-white" : "bg-[#F2EDE2]";
+  const stickyBg        = isDamas ? "bg-white/85" : "bg-[#F2EDE2]/85";
+  const stickyBorder    = isDamas ? "border-gray-100" : "border-[#1F2A40]/10";
+  const titleColor      = isDamas ? "text-gray-900" : "text-[#1F2A40]";
+  const mutedColor      = isDamas ? "text-gray-400" : "text-[#1F2A40]/55";
+  const accentColor     = isDamas ? "text-[#E85A2B]" : "text-[#B5945C]";
+  const accentBg        = isDamas ? "bg-[#E85A2B]" : "bg-[#B5945C]";
+  const backBtnColor    = isDamas ? "text-gray-500 hover:text-gray-900" : "text-[#1F2A40]/60 hover:text-[#1F2A40]";
+  const togglePillTrack = isDamas ? "bg-gray-100" : "bg-[#1F2A40]/8";
+  const leaderColor     = isDamas ? "border-gray-200" : "border-[#1F2A40]/15";
+  const cardBorder      = isDamas ? "border-gray-100" : "border-[#1F2A40]/10";
+  const cardBg          = isDamas ? "bg-white/65 backdrop-blur-md ring-1 ring-white/50" : "bg-[#F2EDE2]/70 backdrop-blur-md ring-1 ring-[#1F2A40]/8";
 
-  const catActive   = isDamas
-    ? "border-damas-orange text-gray-900"
-    : "border-blvd-gold text-white";
-  const catInactive = isDamas
-    ? "border-transparent text-gray-400 hover:text-gray-600"
-    : "border-transparent text-white/40 hover:text-white/70";
+  /* Pill category tab styling */
+  const tabActive = isDamas
+    ? "bg-[#E85A2B] text-white"
+    : "bg-[#1F2A40] text-[#B5945C]";
+  const tabInactive = "bg-transparent text-gray-400 hover:text-gray-800";
 
-  const dayBadgeActive = isDamas
-    ? "bg-[#E85A2B] text-white font-bold px-2 py-1 rounded-sm text-xs animate-pulse inline-block"
-    : "bg-[#B5945C] text-[#1F2A40] font-bold px-2 py-1 rounded-sm text-xs animate-pulse inline-block";
-  const dayBadgeMuted = "border border-gray-300 text-gray-400 bg-transparent px-2 py-1 rounded-sm text-xs opacity-60 inline-block";
+  /* Signature tag — hollow border, brand color */
+  const sigTag = isDamas
+    ? "border border-[#E85A2B] text-[#E85A2B]"
+    : "border border-[#B5945C] text-[#B5945C]";
+
+  /* Day sub-headers */
+  const dayHeaderActive = isDamas ? "text-[#E85A2B] border-[#E85A2B]" : "text-[#B5945C] border-[#B5945C]";
+  const dayHeaderMuted  = "text-gray-400 border-gray-200";
 
   const waMessage = isDamas
     ? "Bonjour%20Damas%20%21%20Je%20souhaite%20passer%20commande."
     : "Bonjour%20Le%20Boulevard%20%21%20Je%20souhaite%20passer%20commande.";
 
+  /* CTA button styling */
+  const ctaBtn = isDamas
+    ? "bg-[#1a1a1a] hover:bg-[#E85A2B] text-white"
+    : "bg-[#1F2A40] hover:bg-[#2D3A52] text-[#B5945C]";
+
+  const activeCat = menuData[brand].categories.find((c) => c.name === activeCategory);
+
   return (
     <>
       {/* ─── Fixed base background ─── */}
-      <div
-        className={`fixed inset-0 z-0 transition-colors duration-1000 ${
-          isDamas ? "bg-[#FAFAFA]" : "bg-blvd-cream"
-        }`}
-      />
+      <div className={`fixed inset-0 z-0 transition-colors duration-1000 ${pageBg}`} />
 
       {/* ─── Animated orb layer ─── */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-[1]" aria-hidden>
@@ -114,26 +125,26 @@ function MenuContent() {
         </div>
       </div>
 
-      {/* ─── Main content ─── */}
       <motion.main
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-[10] flex flex-col min-h-dvh"
       >
-        {/* ─── Branded Navbar ─── */}
-        <header className={`sticky top-0 z-[50] ${navbarBg} border-b ${navbarBorder} shadow-sm transition-all duration-500`}>
+        {/* ─── ONE sticky frosted container: navbar + tabs ─── */}
+        <header className={`sticky top-0 z-[50] backdrop-blur-xl ${stickyBg} border-b ${stickyBorder} transition-colors duration-500`}>
+          {/* Row 1 — Retour | Logo | Brand toggle */}
           <div className="max-w-2xl mx-auto px-4 py-3">
             <div className="flex items-center justify-between">
               <Link href="/" className={`flex items-center gap-1 text-sm ${backBtnColor} transition-colors`}>
-                <ChevronLeft className="w-5 h-5" />
+                <ChevronLeft className="w-5 h-5" strokeWidth={1.5} />
                 <span className="font-medium">Retour</span>
               </Link>
 
               <div className="absolute left-1/2 -translate-x-1/2">
                 <Image
                   src={isDamas ? "/logos/damas.svg" : "/logos/boulevard.svg"}
-                  alt={isDamas ? "Damas Logo" : "Le Boulevard Logo"}
+                  alt={menuData[brand].title}
                   width={120}
                   height={60}
                   className="h-10 w-auto object-contain transition-all duration-500"
@@ -141,19 +152,19 @@ function MenuContent() {
                 />
               </div>
 
-              <div className={`flex rounded-full p-0.5 ${isDamas ? "bg-gray-100" : "bg-white/10"} transition-colors duration-500`}>
+              <div className={`flex rounded-full p-0.5 ${togglePillTrack} transition-colors duration-500`}>
                 <button
-                  onClick={() => setBrand("damas")}
+                  onClick={() => switchBrand("damas")}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
-                    isDamas ? "bg-damas-orange text-white shadow-sm" : "text-white/60 hover:text-white"
+                    isDamas ? "bg-[#E85A2B] text-white shadow-sm" : "text-gray-500 hover:text-gray-800"
                   }`}
                 >
                   Damas
                 </button>
                 <button
-                  onClick={() => setBrand("boulevard")}
+                  onClick={() => switchBrand("boulevard")}
                   className={`px-3 py-1.5 rounded-full text-xs font-semibold tracking-wide transition-all duration-300 ${
-                    !isDamas ? "bg-blvd-gold text-white shadow-sm" : "text-gray-500 hover:text-gray-700"
+                    !isDamas ? "bg-[#1F2A40] text-[#B5945C] shadow-sm" : "text-gray-500 hover:text-gray-800"
                   }`}
                 >
                   Boulevard
@@ -162,81 +173,112 @@ function MenuContent() {
             </div>
           </div>
 
-          {/* Category nav — text-based */}
-          <div className={`border-t ${catBg} transition-all duration-500`}>
+          {/* Row 2 — pill category tabs */}
+          <div className="relative">
             <div
               ref={categoryScrollRef}
-              className="max-w-2xl mx-auto px-4 flex gap-6 overflow-x-auto category-scroll"
+              className="max-w-2xl mx-auto flex gap-2 px-4 pb-3 overflow-x-auto overflow-y-hidden whitespace-nowrap scroll-smooth touch-pan-x hide-scrollbar"
             >
-              {menu.map((cat) => (
+              {menuData[brand].categories.map((cat) => (
                 <button
-                  key={cat.id}
-                  data-cat={cat.id}
-                  onClick={() => scrollToCategory(cat.id)}
-                  className={`shrink-0 py-3 text-[0.65rem] font-semibold uppercase tracking-widest transition-all duration-300 border-b-2 whitespace-nowrap ${
-                    activeCategory === cat.id ? catActive : catInactive
+                  key={cat.name}
+                  data-cat={cat.name}
+                  onClick={() => {
+                    setActiveCategory(cat.name);
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  className={`shrink-0 rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 ${
+                    activeCategory === cat.name ? tabActive : tabInactive
                   }`}
                 >
                   {cat.name}
                 </button>
               ))}
             </div>
+            {/* Right edge fade — signals horizontal scroll */}
+            <div className={`absolute right-0 top-0 bottom-0 w-10 pointer-events-none ${
+              isDamas ? "bg-gradient-to-l from-white/85 to-transparent" : "bg-gradient-to-l from-[#F2EDE2]/85 to-transparent"
+            }`} aria-hidden />
           </div>
         </header>
 
-        {/* ─── Menu content — key forces re-animation on brand switch ─── */}
-        <div key={brand} className="flex-1 max-w-2xl mx-auto w-full px-4 pt-6 pb-36">
-          <div className="mb-8 animate-fade-in">
-            <p className={`text-sm font-medium tracking-wide uppercase ${mutedColor} font-[family-name:var(--font-montserrat)] transition-colors duration-500`}>
-              {isDamas ? "Boulangerie & Fast Casual" : "Salon de Thé & Brunch"}
-            </p>
-            <div className={`mt-3 w-16 h-0.5 ${accentBg} rounded-full`} />
-          </div>
-
-          {menu.map((category, catIdx) => (
-            <section
-              key={category.id}
-              ref={(el) => { categoryRefs.current[category.id] = el; }}
-              className={`mb-6 rounded-2xl overflow-hidden ${glassCard} animate-fade-in-up`}
-              style={{ animationDelay: `${catIdx * 80}ms` }}
+        {/* ─── Menu content ─── */}
+        <div key={`${brand}-${activeCategory}`} className="flex-1 max-w-2xl mx-auto w-full px-4 pt-6 pb-36">
+          {activeCat && (
+            <motion.section
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+              className={`rounded-2xl overflow-hidden ${cardBg}`}
             >
-              {/* Category header inside glass card */}
+              {/* Category header */}
               <div className="px-5 pt-5 pb-3">
-                <h2 className={`font-[family-name:var(--font-playfair)] text-xl font-bold ${headerColor} transition-colors duration-500`}>
-                  {category.name}
+                <h2 className={`font-[family-name:var(--font-playfair)] text-xl font-bold ${titleColor}`}>
+                  {activeCat.name}
                 </h2>
                 <div className={`mt-2 w-8 h-0.5 ${accentBg} rounded-full`} />
               </div>
 
               {/* Items */}
-              <div className="px-5 pb-2">
-                {category.items.map((item, itemIdx) => (
-                  <div
-                    key={`${category.id}-${itemIdx}`}
-                    className="animate-fade-in-up"
-                    style={{ animationDelay: `${catIdx * 80 + itemIdx * 55}ms` }}
-                  >
-                    <MenuItemRow
-                      item={item}
-                      accentColor={accentColor}
-                      headerColor={headerColor}
-                      mutedColor={mutedColor}
-                      badgeClass={badgeClass}
-                      borderColor={borderColor}
-                      leaderColor={leaderColor}
-                      currentDay={currentDay}
-                      dayBadgeActive={dayBadgeActive}
-                      dayBadgeMuted={dayBadgeMuted}
-                    />
-                  </div>
-                ))}
+              <div className="px-5 pb-4">
+                {hasBadges(activeCat.items) ? (
+                  groupByDay(activeCat.items).map(({ day, items }, gIdx) => {
+                    const isToday = currentDay === day;
+                    return (
+                      <div key={day} className="mt-6 first:mt-3">
+                        {/* Day sub-header — rendered ONCE per day group */}
+                        <div className={`mb-4 pb-2 border-b ${isToday ? `${dayHeaderActive} animate-pulse` : dayHeaderMuted}`}>
+                          <p className={`text-[0.7rem] font-bold tracking-[0.25em] uppercase font-[family-name:var(--font-montserrat)]`}>
+                            {isToday ? `📍 AUJOURD'HUI : ${day}` : day}
+                          </p>
+                        </div>
+
+                        {items.map((item, iIdx) => (
+                          <div
+                            key={`${day}-${item.name}-${iIdx}`}
+                            className="animate-fade-in-up"
+                            style={{ animationDelay: `${gIdx * 60 + iIdx * 40}ms` }}
+                          >
+                            <ItemRow
+                              item={item}
+                              titleColor={titleColor}
+                              mutedColor={mutedColor}
+                              accentColor={accentColor}
+                              cardBorder={cardBorder}
+                              leaderColor={leaderColor}
+                              sigTag={sigTag}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })
+                ) : (
+                  activeCat.items.map((item, iIdx) => (
+                    <div
+                      key={`${item.name}-${iIdx}`}
+                      className="animate-fade-in-up"
+                      style={{ animationDelay: `${iIdx * 45}ms` }}
+                    >
+                      <ItemRow
+                        item={item}
+                        titleColor={titleColor}
+                        mutedColor={mutedColor}
+                        accentColor={accentColor}
+                        cardBorder={cardBorder}
+                        leaderColor={leaderColor}
+                        sigTag={sigTag}
+                      />
+                    </div>
+                  ))
+                )}
               </div>
-            </section>
-          ))}
+            </motion.section>
+          )}
         </div>
 
-        {/* ─── Sticky Footer — frosted glass + brand CTA ─── */}
-        <footer className={`sticky bottom-0 z-[50] glass-overlay ${footerBg} border-t ${borderColor} py-4 px-4 transition-colors duration-500`}>
+        {/* ─── Sticky footer — frosted glass + brand CTA ─── */}
+        <footer className={`sticky bottom-0 z-[50] glass-overlay ${stickyBg} border-t ${stickyBorder} py-4 px-4`}>
           <div className="max-w-lg mx-auto space-y-2.5">
             <p className={`text-xs text-center ${mutedColor} font-[family-name:var(--font-montserrat)]`}>
               +221 77 364 09 09
@@ -245,7 +287,7 @@ function MenuContent() {
               href={`https://wa.me/221773640909?text=${waMessage}`}
               target="_blank"
               rel="noopener noreferrer"
-              className={isDamas ? "cta-btn-damas" : "cta-btn-boulevard"}
+              className={`flex items-center justify-center gap-2 w-full px-5 py-3.5 rounded-xl text-sm font-semibold tracking-wide transition-all duration-300 ${ctaBtn}`}
             >
               {WA_ICON}
               Commander sur WhatsApp
@@ -257,61 +299,44 @@ function MenuContent() {
   );
 }
 
-/* ─── Menu Item Row — editorial, dotted leader line ─── */
-function MenuItemRow({
+/* ─── Editorial item row — name | dotted leader | price ─── */
+function ItemRow({
   item,
-  accentColor,
-  headerColor,
+  titleColor,
   mutedColor,
-  badgeClass,
-  borderColor,
+  accentColor,
+  cardBorder,
   leaderColor,
-  currentDay,
-  dayBadgeActive,
-  dayBadgeMuted,
+  sigTag,
 }: {
   item: MenuItem;
-  accentColor: string;
-  headerColor: string;
+  titleColor: string;
   mutedColor: string;
-  badgeClass: string;
-  borderColor: string;
+  accentColor: string;
+  cardBorder: string;
   leaderColor: string;
-  currentDay: string | null;
-  dayBadgeActive: string;
-  dayBadgeMuted: string;
+  sigTag: string;
 }) {
-  const isToday = currentDay !== null && item.badge === currentDay;
-
   return (
-    <div className={`py-5 border-b ${borderColor} last:border-b-0`}>
-      {/* Day badge — above the title, only when item has a badge assigned */}
-      {item.badge && currentDay && (
-        <div className="mb-2">
-          <span className={isToday ? dayBadgeActive : dayBadgeMuted}>
-            {isToday
-              ? `📍 AUJOURD'HUI : ${item.badge.toUpperCase()}`
-              : item.badge}
-          </span>
-        </div>
-      )}
-
-      {/* Name + dotted leader + price */}
+    <div className={`py-4 border-b ${cardBorder} last:border-b-0`}>
       <div className="flex items-baseline gap-2">
         <div className="shrink-0 flex items-baseline gap-2">
-          <h3 className={`font-[family-name:var(--font-playfair)] text-base font-semibold ${headerColor} transition-colors duration-300`}>
+          <h3 className={`font-[family-name:var(--font-playfair)] text-base font-semibold ${titleColor}`}>
             {item.name}
           </h3>
-          {item.isSignature && <span className={badgeClass}>Signature</span>}
+          {item.isSignature && (
+            <span className={`${sigTag} text-[0.55rem] font-semibold tracking-[0.18em] uppercase px-2 py-0.5 rounded-sm whitespace-nowrap`}>
+              Signature
+            </span>
+          )}
         </div>
         <div className={`flex-1 border-b border-dashed ${leaderColor} translate-y-[-4px]`} />
         <span className={`shrink-0 text-sm font-bold ${accentColor} tabular-nums font-[family-name:var(--font-montserrat)]`}>
           {item.price}
         </span>
       </div>
-
       {item.description && (
-        <p className={`mt-1.5 text-sm italic ${mutedColor} leading-relaxed font-[family-name:var(--font-montserrat)] transition-colors duration-300`}>
+        <p className={`mt-1.5 text-sm italic ${mutedColor} leading-relaxed font-[family-name:var(--font-montserrat)]`}>
           {item.description}
         </p>
       )}
@@ -319,15 +344,12 @@ function MenuItemRow({
   );
 }
 
-/* ─── Suspense wrapper (required for useSearchParams) ─── */
-import { Suspense } from "react";
-
 export default function MenuPage() {
   return (
     <Suspense
       fallback={
         <div className="flex items-center justify-center min-h-dvh">
-          <div className="w-8 h-8 border-2 border-gray-200 border-t-damas-orange rounded-full animate-spin" />
+          <div className="w-8 h-8 border-2 border-gray-200 border-t-[#E85A2B] rounded-full animate-spin" />
         </div>
       }
     >

@@ -117,12 +117,14 @@ body {
   clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
-/* ─── Category Scroll ─── */
-.category-scroll {
+/* ─── Hidden scrollbars (horizontal nav) ─── */
+.category-scroll,
+.hide-scrollbar {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-.category-scroll::-webkit-scrollbar {
+.category-scroll::-webkit-scrollbar,
+.hide-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
