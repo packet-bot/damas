@@ -67,7 +67,7 @@ function MenuContent() {
   const isDamas = brand === "damas";
 
   /* ─── Theme tokens ─── */
-  const pageBg          = isDamas ? "bg-white" : "bg-[#F2EDE2]";
+  const pageBg          = isDamas ? "bg-[#FAFAFA]" : "bg-[#F2EDE2]";
   const stickyBg        = isDamas ? "bg-white/85" : "bg-[#F2EDE2]/85";
   const stickyBorder    = isDamas ? "border-gray-100" : "border-[#1F2A40]/10";
   const titleColor      = isDamas ? "text-gray-900" : "text-[#1F2A40]";
@@ -77,8 +77,8 @@ function MenuContent() {
   const backBtnColor    = isDamas ? "text-gray-500 hover:text-gray-900" : "text-[#1F2A40]/60 hover:text-[#1F2A40]";
   const togglePillTrack = isDamas ? "bg-gray-100" : "bg-[#1F2A40]/8";
   const leaderColor     = isDamas ? "border-gray-200" : "border-[#1F2A40]/15";
-  const cardBorder      = isDamas ? "border-gray-100" : "border-[#1F2A40]/10";
-  const cardBg          = isDamas ? "bg-white/65 backdrop-blur-md ring-1 ring-white/50" : "bg-[#F2EDE2]/70 backdrop-blur-md ring-1 ring-[#1F2A40]/8";
+  const cardBorder      = isDamas ? "border-white/30" : "border-white/20";
+  const glassBg         = isDamas ? "bg-white/40" : "bg-[#F2EDE2]/50";
 
   /* Pill category tab styling */
   const tabActive = isDamas
@@ -109,21 +109,25 @@ function MenuContent() {
   return (
     <>
       {/* ─── Fixed base background ─── */}
-      <div className={`fixed inset-0 z-0 transition-colors duration-1000 ${pageBg}`} />
+      <div className={`fixed inset-0 -z-20 transition-colors duration-1000 ${pageBg}`} />
 
-      {/* ─── Animated orb layer ─── */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none z-[1]" aria-hidden>
-        <div className={`absolute inset-0 transition-opacity duration-1000 ${isDamas ? "opacity-100" : "opacity-0"}`}>
-          <div className="orb orb-damas-1" />
-          <div className="orb orb-damas-2" />
-          <div className="orb orb-damas-3" />
+      {/* ─── Living Aurora Orbs (Damas) ─── */}
+      {isDamas && (
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden>
+          <div className="absolute top-[-100px] left-[-100px] w-[500px] h-[500px] rounded-full bg-[#E85A2B] blur-[120px] opacity-30 animate-pulse" />
+          <div className="absolute bottom-[-100px] right-[-100px] w-[500px] h-[500px] rounded-full bg-[#FFB347] blur-[120px] opacity-30" />
+          <div className="absolute top-1/2 left-1/3 w-[400px] h-[400px] rounded-full bg-[#E85A2B] blur-[100px] opacity-20 animate-pulse" style={{ animationDuration: '8s' }} />
         </div>
-        <div className={`absolute inset-0 transition-opacity duration-1000 ${!isDamas ? "opacity-100" : "opacity-0"}`}>
-          <div className="orb orb-blvd-1" />
-          <div className="orb orb-blvd-2" />
-          <div className="orb orb-blvd-3" />
+      )}
+
+      {/* ─── Living Aurora Orbs (Boulevard) ─── */}
+      {!isDamas && (
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10" aria-hidden>
+          <div className="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] rounded-full bg-[#B5945C] blur-[120px] opacity-30 animate-pulse" />
+          <div className="absolute bottom-[-100px] left-[-100px] w-[500px] h-[500px] rounded-full bg-[#1F2A40] blur-[120px] opacity-10" />
+          <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] rounded-full bg-[#B5945C] blur-[100px] opacity-20 animate-pulse" style={{ animationDuration: '10s' }} />
         </div>
-      </div>
+      )}
 
       <motion.main
         initial={{ opacity: 0, y: 12 }}
@@ -202,14 +206,14 @@ function MenuContent() {
           </div>
         </header>
 
-        {/* ─── Menu content ─── */}
-        <div key={`${brand}-${activeCategory}`} className="flex-1 max-w-2xl mx-auto w-full px-4 pt-6 pb-36">
+        {/* ─── Menu content Glass Card ─── */}
+        <div key={`${brand}-${activeCategory}`} className="flex-1 max-w-5xl mx-auto w-full px-4 pt-6 pb-36">
           {activeCat && (
             <motion.section
-              initial={{ opacity: 0, y: 16 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className={`rounded-2xl overflow-hidden ${cardBg}`}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+              className={`backdrop-blur-2xl ${glassBg} border ${cardBorder} shadow-2xl rounded-3xl overflow-hidden p-6 md:p-10`}
             >
               {/* Category header */}
               <div className="px-5 pt-5 pb-3">
