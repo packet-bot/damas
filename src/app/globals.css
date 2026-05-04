@@ -284,6 +284,47 @@ body {
   animation: orb-drift-3 38s ease-in-out infinite;
 }
 
+/* Section decorative blobs — "Nos Univers" */
+.section-blob-orange {
+  position: absolute;
+  width: 28rem;
+  height: 28rem;
+  background: #E85A2B;
+  border-radius: 50%;
+  filter: blur(96px);
+  opacity: 0.12;
+  top: -5rem;
+  left: -5rem;
+  pointer-events: none;
+  animation: orb-drift-1 32s ease-in-out infinite;
+}
+.section-blob-gold {
+  position: absolute;
+  width: 32rem;
+  height: 32rem;
+  background: #B5945C;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.10;
+  bottom: -6rem;
+  right: -6rem;
+  pointer-events: none;
+  animation: orb-drift-2 40s ease-in-out infinite;
+}
+.section-blob-navy {
+  position: absolute;
+  width: 20rem;
+  height: 20rem;
+  background: #1F2A40;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.06;
+  top: 40%;
+  left: 50%;
+  pointer-events: none;
+  animation: orb-drift-3 50s ease-in-out infinite;
+}
+
 /* Boulevard — gold + navy on cream */
 .orb-blvd-1 {
   width: 75vmax;

@@ -8,10 +8,10 @@ import { ArrowRight, ChevronDown, Phone } from "lucide-react";
 
 /* ─── Hero image sequence ─── */
 const HERO_IMAGES = [
-  "/images/hero-traiteur.jpg",
-  "/images/hero-boulevard-tea.jpg",
-  "/images/hero-teranga.jpg",
-  "/images/hero-bakery.jpg",
+  "/hero/hero-traiteur.png",
+  "/hero/hero-boulevard-tea.png",
+  "/hero/hero-teranga.png",
+  "/hero/hero-bakery.png",
 ];
 
 const InstagramIcon = () => (
@@ -150,8 +150,13 @@ export default function HomePage() {
       </section>
 
       {/* ─── SECTION 2: Nos Univers ─── */}
-      <section className="py-28 px-4 bg-white">
-        <div className="max-w-4xl mx-auto">
+      <section className="relative py-28 px-4 bg-[#FAFAFA] overflow-hidden">
+        {/* Decorative floating blobs */}
+        <div className="section-blob-orange" aria-hidden />
+        <div className="section-blob-gold" aria-hidden />
+        <div className="section-blob-navy" aria-hidden />
+
+        <div className="relative z-10 max-w-4xl mx-auto">
           <FadeUp className="text-center mb-16">
             <p className="text-[0.6rem] tracking-[0.3em] uppercase text-gray-400 font-[family-name:var(--font-montserrat)] mb-3">
               Nos Univers
