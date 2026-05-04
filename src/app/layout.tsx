@@ -17,6 +17,7 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://damas-sn.vercel.app"),
   title: "Damas | Dalal Ak Jaam",
   description:
     "Bienvenue chez Damas — Boulangerie artisanale, Fast Casual & Salon de Thé à Dakar. Découvrez nos menus signature.",
@@ -35,6 +36,19 @@ export const metadata: Metadata = {
       "Boulangerie artisanale, Fast Casual & Salon de Thé premium à Dakar.",
     type: "website",
     locale: "fr_SN",
+    images: [
+      {
+        url: "/opengraph-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Damas Bakery & Hospitality",
+      },
+    ],
+  },
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
   },
   other: {
     "theme-color": "#E85A2B",
