@@ -32,6 +32,13 @@ function MenuContent() {
   const isDamas = brand === "damas";
   const menu: MenuCategory[] = isDamas ? damasMenu : boulevardMenu;
 
+  /* Current day — null on server, set client-side to avoid hydration mismatch */
+  const [currentDay, setCurrentDay] = useState<string | null>(null);
+  useEffect(() => {
+    const DAYS = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+    setCurrentDay(DAYS[new Date().getDay()]);
+  }, []);
+
   useEffect(() => {
     if (menu.length > 0) setActiveCategory(menu[0].id);
   }, [brand, menu]);
@@ -74,6 +81,11 @@ function MenuContent() {
   const catInactive = isDamas
     ? "border-transparent text-gray-400 hover:text-gray-600"
     : "border-transparent text-white/40 hover:text-white/70";
+
+  const dayBadgeActive = isDamas
+    ? "bg-[#E85A2B] text-white font-bold px-2 py-1 rounded-sm text-xs animate-pulse inline-block"
+    : "bg-[#B5945C] text-[#1F2A40] font-bold px-2 py-1 rounded-sm text-xs animate-pulse inline-block";
+  const dayBadgeMuted = "border border-gray-300 text-gray-400 bg-transparent px-2 py-1 rounded-sm text-xs opacity-60 inline-block";
 
   const waMessage = isDamas
     ? "Bonjour%20Damas%20%21%20Je%20souhaite%20passer%20commande."
@@ -212,6 +224,9 @@ function MenuContent() {
                       badgeClass={badgeClass}
                       borderColor={borderColor}
                       leaderColor={leaderColor}
+                      currentDay={currentDay}
+                      dayBadgeActive={dayBadgeActive}
+                      dayBadgeMuted={dayBadgeMuted}
                     />
                   </div>
                 ))}
@@ -251,6 +266,9 @@ function MenuItemRow({
   badgeClass,
   borderColor,
   leaderColor,
+  currentDay,
+  dayBadgeActive,
+  dayBadgeMuted,
 }: {
   item: MenuItem;
   accentColor: string;
@@ -259,9 +277,26 @@ function MenuItemRow({
   badgeClass: string;
   borderColor: string;
   leaderColor: string;
+  currentDay: string | null;
+  dayBadgeActive: string;
+  dayBadgeMuted: string;
 }) {
+  const isToday = currentDay !== null && item.badge === currentDay;
+
   return (
     <div className={`py-5 border-b ${borderColor} last:border-b-0`}>
+      {/* Day badge — above the title, only when item has a badge assigned */}
+      {item.badge && currentDay && (
+        <div className="mb-2">
+          <span className={isToday ? dayBadgeActive : dayBadgeMuted}>
+            {isToday
+              ? `📍 AUJOURD'HUI : ${item.badge.toUpperCase()}`
+              : item.badge}
+          </span>
+        </div>
+      )}
+
+      {/* Name + dotted leader + price */}
       <div className="flex items-baseline gap-2">
         <div className="shrink-0 flex items-baseline gap-2">
           <h3 className={`font-[family-name:var(--font-playfair)] text-base font-semibold ${headerColor} transition-colors duration-300`}>
@@ -274,6 +309,7 @@ function MenuItemRow({
           {item.price}
         </span>
       </div>
+
       {item.description && (
         <p className={`mt-1.5 text-sm italic ${mutedColor} leading-relaxed font-[family-name:var(--font-montserrat)] transition-colors duration-300`}>
           {item.description}

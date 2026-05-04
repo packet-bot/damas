@@ -4,6 +4,7 @@ export interface MenuItem {
   description?: string;
   isSignature?: boolean;
   image?: string;
+  badge?: string; // French day name — e.g. "Lundi"
 }
 
 export interface MenuCategory {
@@ -23,24 +24,54 @@ export const damasMenu: MenuCategory[] = [
         description:
           "Croissant pur beurre, jus d'orange pressé, café ou thé au choix.",
         isSignature: true,
+        badge: "Lundi",
       },
       {
         name: "Formule Vitalité",
         price: "5 500 F",
         description:
           "Pain au chocolat, yaourt grec, fruits de saison, boisson chaude.",
+        badge: "Mardi",
       },
       {
         name: "Tartine Avocat & Œuf",
         price: "3 500 F",
         description:
           "Pain de campagne toasté, avocat écrasé, œuf poché, piment d'Espelette.",
+        badge: "Mercredi",
       },
       {
         name: "Pancakes Maison",
         price: "3 000 F",
         description:
           "Trois pancakes moelleux, sirop d'érable, fruits rouges, crème chantilly.",
+        badge: "Jeudi",
+      },
+      {
+        name: "Formule Mini Brunch",
+        price: "5 000 F",
+        description: "Café ou thé, Œuf (omelette ou plat), Saucisse ou viande, Pain beurre, Jus naturel",
+        badge: "Samedi",
+      },
+      {
+        name: "Formule Brunch",
+        price: "12 000 F",
+        description: "Boisson chaude, Œufs, Saucisse/viande ou poulet crispy, Viennoiserie, Charcuteries et fromages, Pain beurre, Jus naturel",
+        badge: "Samedi",
+        isSignature: true,
+      },
+      {
+        name: "Tradition Light",
+        price: "2 500 F",
+        description: "Café ou thé, Bouillie (mil au lait caillé)",
+        badge: "Dimanche",
+      },
+      {
+        name: "Tradition Complète",
+        price: "4 000 F",
+        description: "Café ou thé, Lakh ou bouillie, Pain + accompagnement sucré, Jus naturel",
+        badge: "Dimanche",
+        isSignature: true,
       },
     ],
   },
@@ -85,12 +116,14 @@ export const damasMenu: MenuCategory[] = [
         price: "3 500 F",
         description:
           "Triple étage : poulet rôti, bacon croustillant, œuf, crudités.",
+        badge: "Vendredi",
       },
       {
         name: "Wrap César",
         price: "3 000 F",
         description:
           "Poulet grillé, parmesan, croûtons, romaine, sauce César maison.",
+        badge: "Samedi",
       },
       {
         name: "Croque-Monsieur",
@@ -166,18 +199,21 @@ export const boulevardMenu: MenuCategory[] = [
         description:
           "Eggs Benedict, saumon fumé, viennoiseries, fruits, jus pressé, boisson chaude.",
         isSignature: true,
+        badge: "Samedi",
       },
       {
         name: "Brunch Terroir",
         price: "10 000 F",
         description:
           "Thiakry revisité, accara, fruits de saison, thé attaya, pain artisanal.",
+        badge: "Dimanche",
       },
       {
         name: "Brunch Léger",
         price: "8 000 F",
         description:
           "Granola maison, yaourt grec, fruits, tartine avocat, jus pressé.",
+        badge: "Vendredi",
       },
     ],
   },
