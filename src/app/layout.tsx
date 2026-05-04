@@ -36,14 +36,23 @@ export const metadata: Metadata = {
       "Boulangerie artisanale, Fast Casual & Salon de Thé premium à Dakar.",
     type: "website",
     locale: "fr_SN",
+    url: "https://damas-sn.vercel.app",
+    siteName: "Damas",
     images: [
       {
-        url: "/opengraph-image.png",
-        width: 1200,
-        height: 630,
-        alt: "Damas Bakery & Hospitality",
+        url: "https://damas-sn.vercel.app/opengraph-image.png",
+        width: 1024,
+        height: 1024,
+        alt: "Damas — Dalal Ak Jaam",
+        type: "image/jpeg",
       },
     ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Damas | Dalal Ak Jaam",
+    description: "Boulangerie artisanale, Fast Casual & Salon de Thé premium à Dakar.",
+    images: ["https://damas-sn.vercel.app/opengraph-image.png"],
   },
   icons: {
     icon: "/icon.svg",
