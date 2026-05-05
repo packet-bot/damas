@@ -87,7 +87,7 @@ export default function HomePage() {
             src={src}
             alt="Damas — Gastronomie Sénégalaise"
             fill
-            className={`object-cover transition-opacity duration-1000 ease-in-out ${
+            className={`object-cover transition-opacity duration-[2500ms] ease-in-out ${
               i === heroIdx ? "opacity-100" : "opacity-0"
             }`}
             priority={i === 0}
